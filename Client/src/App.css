@@ -1,0 +1,23 @@
+body {
+  padding-top: 5rem;
+}
+
+.Thumbnail {
+    width: 150px;
+    height: 100px;
+    display: inline-block;
+}
+
+.Slider {
+  overflow-x: scroll;
+  white-space: nowrap;
+}
+
+.DetailsCloseButton {
+  font-size: 1.5rem;
+  float: right;
+}
+
+.AuthorName, .Subjects {
+  font-size: smaller;
+}
