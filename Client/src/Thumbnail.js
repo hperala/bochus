@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import configuration from './configuration';
 
 class Thumbnail extends Component {
   constructor(props) {
@@ -15,7 +16,7 @@ class Thumbnail extends Component {
     const item = this.props.item;
     return (
       <img key={item.ID}
-        src={'http://localhost:59031/Content/Thumbnails/' + item.ExternalID + '.png'} 
+        src={configuration.THUMBNAILS_BASE_URL + item.ExternalID + '.png'}
         className="Thumbnail img-fluid img-thumbnail"
         alt={item.Title} 
         onClick={this.clicked} />

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Category from './Category';
 import About from './About';
 import NavBar from './NavBar';
+import configuration from './configuration';
 import './App.css';
 
 class App extends Component {
@@ -24,7 +25,7 @@ class App extends Component {
   componentDidMount() {
     const self = this;
 
-    fetch('http://localhost:59031/api/Recommendations')
+    fetch(configuration.RECOMMENDATIONS_ENDPOINT)
       .then(function(response) {
         if (response.ok) {
           return response.json();

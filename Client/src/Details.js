@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Goodreads from './Goodreads';
+import configuration from './configuration';
 
 class Details extends Component {
   setDefaults(item) {
@@ -25,7 +26,7 @@ class Details extends Component {
     const locations = item.Locations.map((location) =>
       <li key={location.ID}>{location.Name}</li>
     );
-    const finnaLink = 'https://heili.finna.fi' + item.ExternalRelativeUrl;
+    const finnaLink = configuration.FINNA_BASE_URL + item.ExternalRelativeUrl;
 
     return (
       <div className="Details card" hidden={this.props.hidden}>
