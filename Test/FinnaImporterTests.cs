@@ -4,7 +4,7 @@ using Moq;
 using Core;
 using Web;
 
-namespace WebApp.Models.Tests
+namespace Test
 {
     [TestClass()]
     public class FinnaImporterTests
