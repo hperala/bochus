@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Core;
+using System;
 
 namespace Infrastructure
 {
-    public class Throttler
+    public class Throttler : IThrottler
     {
         private DateTime lastAccessDate = DateTime.MinValue;
 

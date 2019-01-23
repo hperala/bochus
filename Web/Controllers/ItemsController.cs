@@ -1,5 +1,8 @@
 ﻿using Core;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Net;
+using System.Threading.Tasks;
 using System.Web.Configuration;
 using System.Web.Hosting;
 using System.Web.Http;
@@ -12,10 +15,17 @@ namespace Web.Controllers
     public class ItemsController : ApiController
     {
         private IRepository repository;
+        private IGoodreads goodreads;
+        private IThrottler goodreadsAccess;
 
-        public ItemsController(IRepository repository)
+        public ItemsController(
+            IRepository repository, 
+            IGoodreads goodreads, 
+            IThrottler goodreadsAccess)
         {
             this.repository = repository;
+            this.goodreads = goodreads;
+            this.goodreadsAccess = goodreadsAccess;
         }
 
         // GET: api/Items/5
@@ -47,6 +57,54 @@ namespace Web.Controllers
             repository.SaveChanges();
 
             return CreatedAtRoute("DefaultApi", new { controller = "Items", id = item.ID }, item);
+        }
+
+        [HttpGet]
+        [Route("api/Items/SearchReviews")]
+        [ResponseType(typeof(GoodreadsBookSearchResult))]
+        public async Task<IHttpActionResult> SearchReviewsAsync(int id)
+        {
+            if (!goodreadsAccess.IsAvailable(DateTime.Now))
+            {
+                return StatusCode(HttpStatusCode.ServiceUnavailable);
+            }
+
+            try
+            {
+                Item item = repository.GetItem(id);
+                if (item == null)
+                {
+                    return NotFound();
+                }
+
+                var result = await goodreads.SearchBooksAsync(item);
+                return Ok(result);
+            }
+            finally
+            {
+                goodreadsAccess.RequestCompleted(DateTime.Now);
+            }
+        }
+
+        [HttpGet]
+        [Route("api/Items/Reviews")]
+        [ResponseType(typeof(GoodreadsBookSearchResult))]
+        public async Task<IHttpActionResult> GetReviewsAsync(int gr_book_id)
+        {
+            if (!goodreadsAccess.IsAvailable(DateTime.Now))
+            {
+                return StatusCode(HttpStatusCode.ServiceUnavailable);
+            }
+
+            try
+            {
+                var result = await goodreads.GetReviewsAsync(gr_book_id);
+                return Ok(result);
+            }
+            finally
+            {
+                goodreadsAccess.RequestCompleted(DateTime.Now);
+            }
         }
 
         private void CreateAndSaveTitleCard(Item item)

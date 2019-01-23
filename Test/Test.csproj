@@ -76,6 +76,8 @@
   <ItemGroup>
     <Compile Include="FinnaApiSearchTests.cs" />
     <Compile Include="FinnaImporterTests.cs" />
+    <Compile Include="GoodreadsApiBookSearchTests.cs" />
+    <Compile Include="GoodreadsApiReviewsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringUtilitiesTests.cs" />
     <Compile Include="TitleCardTests.cs" />

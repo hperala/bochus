@@ -3,6 +3,7 @@ using Autofac.Integration.WebApi;
 using Core;
 using Infrastructure;
 using System.Reflection;
+using System.Web.Configuration;
 using System.Web.Http;
 
 namespace Web
@@ -11,6 +12,9 @@ namespace Web
     {
         public static void Register(HttpConfiguration config)
         {
+            var settings = WebConfigurationManager.AppSettings;
+            var interval = int.Parse(settings["GoodreadsCooldownMillis"]);
+
             // CORS
             config.EnableCors();
 
@@ -18,6 +22,10 @@ namespace Web
             var builder = new ContainerBuilder();
             builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
             builder.RegisterType<EFRepository>().As<IRepository>();
+            builder.RegisterType<Goodreads>().As<IGoodreads>();
+            builder.Register(c => new Throttler() { MinIntervalMillis = interval })
+                .As<IThrottler>()
+                .SingleInstance();
             var container = builder.Build();
             config.DependencyResolver = new AutofacWebApiDependencyResolver(container);
 
