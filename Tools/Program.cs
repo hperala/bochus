@@ -41,6 +41,10 @@ namespace Tools
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+                if (e.InnerException != null)
+                {
+                    Console.WriteLine(e.InnerException.Message);
+                }
             }
         }
 
@@ -54,6 +58,7 @@ namespace Tools
             Console.WriteLine("\t\tDownload predefined data from the Finna API and save it locally.");
             Console.WriteLine($"\t {Commands[(int)CommandIndex.ImportFinna]} <url> <file to import>");
             Console.WriteLine("\t\tSend locally saved Finna data to the application's Import endpoint.");
+            Console.WriteLine("\t\tA mandatory password parameter will be added from configuration.");
             Console.WriteLine("\t\tE.g. mgttool import-finna http://localhost:53133/api/Items/Import response-fantasia-2018.json");
         }
 
@@ -94,7 +99,13 @@ namespace Tools
 
         static async Task ImportFinnaDataAsync(string[] args)
         {
-            var url = args[1];
+            var settings = ConfigurationManager.AppSettings;
+            var password = settings["AdminPassword"];
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ArgumentException("Setting \"AdminPassword\" not found.");
+            }
+            var url = args[1] + "?password=" + password;
             var fileName = args[2];
 
             var root = JObject.Parse(File.ReadAllText(fileName));
@@ -114,9 +125,9 @@ namespace Tools
                         response.EnsureSuccessStatusCode();
                         Console.Write(".");
                     }
-                    catch
+                    catch (Exception e)
                     {
-                        Console.Write("F");
+                        Console.WriteLine("\r\n" + e.Message);
                     }
                 }
             }

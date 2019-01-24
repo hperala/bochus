@@ -44,9 +44,15 @@ namespace Web.Controllers
         [HttpPost]
         [Route("api/Items/Import")]
         [ResponseType(typeof(Item))]
-        public IHttpActionResult ImportFinnaItem([FromBody]JObject finnaItem)
+        public IHttpActionResult ImportFinnaItem([FromBody]JObject finnaItem, string password)
         {
             var settings = WebConfigurationManager.AppSettings;
+            var adminPassword = settings["AdminPassword"];
+            if (string.IsNullOrEmpty(adminPassword) || adminPassword != password)
+            {
+                return StatusCode(HttpStatusCode.Unauthorized);
+            }
+
             var separator = settings["SubjectPartSeparator"];
             var importer = new FinnaImporter(repository, separator);
 
