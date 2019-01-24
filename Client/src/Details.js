@@ -49,7 +49,7 @@ class Details extends Component {
             <p>Tarkista tämänhetkinen saatavuus <a href={finnaLink}>Finnasta</a>.</p>
           </div>
           <div className="col-md">
-            <Goodreads />
+            <Goodreads reviews={this.props.reviews} />
           </div>
         </div>
         </div>
