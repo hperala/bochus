@@ -1,6 +1,7 @@
 ﻿using Infrastructure;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.IO;
@@ -48,7 +49,7 @@ namespace Tools
             }
         }
 
-        private static void Usage()
+        static void Usage()
         {
             var syntaxFormat = "Usage: mgttool ({0}) <arguments>";
             var syntax = string.Format(syntaxFormat, string.Join("|", Commands));
@@ -62,7 +63,7 @@ namespace Tools
             Console.WriteLine("\t\tE.g. mgttool import-finna http://localhost:53133/api/Items/Import response-fantasia-2018.json");
         }
 
-        private static bool ValidArguments(string[] args)
+        static bool ValidArguments(string[] args)
         {
             return args.Length > 0
                 && Commands.Contains(args[0]);
@@ -105,7 +106,7 @@ namespace Tools
             {
                 throw new ArgumentException("Setting \"AdminPassword\" not found.");
             }
-            var url = args[1] + "?password=" + password;
+            var url = BuildImportUrl(args[1], password);
             var fileName = args[2];
 
             var root = JObject.Parse(File.ReadAllText(fileName));
@@ -179,6 +180,18 @@ namespace Tools
                 File.WriteAllText($"response{id}.json", content);
             }
             api.RequestCompleted(DateTime.Now);
+        }
+
+        static string BuildImportUrl(string urlWithoutQuery, string password)
+        {
+            var query = UrlUtilities.ToQuery(
+                new List<Tuple<string, string>>()
+                {
+                    new Tuple<string, string>("password", password)
+                },
+                false
+            );
+            return urlWithoutQuery + "?" + query;
         }
     }
 }
