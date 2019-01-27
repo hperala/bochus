@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Core
 {
@@ -15,13 +14,13 @@ namespace Core
     {
         private readonly IRepository repository;
 
-        private readonly Genre genre;
+        private readonly Keyword genre;
 
         private readonly int numItems;
 
         private List<Item> items = new List<Item>();
 
-        public GenreBasedCategory(IRepository repository, Genre genre, int numItems)
+        public GenreBasedCategory(IRepository repository, Keyword genre, int numItems)
         {
             this.repository = repository;
             this.genre = genre;
@@ -35,7 +34,7 @@ namespace Core
 
         public void LoadItems()
         {
-            items.AddRange(repository.GetItemsByGenre(genre).Take(numItems));
+            items.AddRange(repository.GetRandomItemsByGenre(genre, numItems));
         }
     }
 
@@ -43,13 +42,13 @@ namespace Core
     {
         private readonly IRepository repository;
 
-        private readonly Subject subject;
+        private readonly Keyword subject;
 
         private readonly int numItems;
 
         private List<Item> items = new List<Item>();
 
-        public SubjectBasedCategory(IRepository repository, Subject subject, int numItems)
+        public SubjectBasedCategory(IRepository repository, Keyword subject, int numItems)
         {
             this.repository = repository;
             this.subject = subject;
@@ -63,7 +62,7 @@ namespace Core
 
         public void LoadItems()
         {
-            items.AddRange(repository.GetItemsBySubject(subject).Take(numItems));
+            items.AddRange(repository.GetRandomItemsBySubject(subject, numItems));
         }
     }
 }

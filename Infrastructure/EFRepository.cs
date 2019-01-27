@@ -1,4 +1,6 @@
 ﻿using Core;
+using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 
@@ -12,6 +14,7 @@ namespace Infrastructure
         private readonly EFSubRepository<Subject> subjects;
         private readonly EFSubRepository<Genre> genres;
         private readonly EFSubRepository<Location> locations;
+        private readonly Random random;
 
         public EFRepository()
         {
@@ -21,6 +24,8 @@ namespace Infrastructure
             subjects = new EFSubRepository<Subject>(dbContext);
             genres = new EFSubRepository<Genre>(dbContext);
             locations = new EFSubRepository<Location>(dbContext);
+
+            random = new Random();
         }
 
         public void AddDetailedSubject(DetailedSubject entity)
@@ -58,12 +63,18 @@ namespace Infrastructure
             return genres.GetAll();
         }
 
-        public IQueryable<Genre> GetTopGenres(int limit)
+        public IEnumerable<Keyword> GetTopGenres(int limit)
         {
-            return dbContext.Genres
-                .Include(g => g.Items)
-                .OrderByDescending(g => g.Items.Count)
-                .Take(limit);
+            return dbContext.Database.SqlQuery<Keyword>(@"
+SELECT TOP (@p0) ID,
+       [Text],
+       COUNT(*) AS Count
+FROM Genres
+JOIN GenreItems ON ID = Genre_ID
+GROUP BY ID,
+         [Text]
+ORDER BY Count DESC",
+                limit).ToList();
         }
 
         public IQueryable<Item> GetAllItems()
@@ -71,22 +82,32 @@ namespace Infrastructure
             return items.GetAll();
         }
 
-        public IQueryable<Item> GetItemsBySubject(Subject subject)
+        public IQueryable<Item> GetRandomItemsBySubject(Keyword subject, int limit)
         {
+            int startPos = RandomStartingPos(subject, limit);
             return dbContext.Items
                 .Include(i => i.Genres)
                 .Include(i => i.Subjects)
                 .Include(i => i.Locations)
-                .Where(i => i.Subjects.Any(s => s.SubjectID == subject.ID));
+                .Where(i => i.Subjects.Any(s => s.SubjectID == subject.ID))
+                .OrderBy(i => i.ID)
+                .Skip(startPos)
+                .Take(limit)
+                .AsNoTracking();
         }
 
-        public IQueryable<Item> GetItemsByGenre(Genre genre)
+        public IQueryable<Item> GetRandomItemsByGenre(Keyword genre, int limit)
         {
+            int startPos = RandomStartingPos(genre, limit);
             return dbContext.Items
                 .Include(i => i.Genres)
                 .Include(i => i.Subjects)
                 .Include(i => i.Locations)
-                .Where(i => i.Genres.Any(g => g.ID == genre.ID));
+                .Where(i => i.Genres.Any(g => g.ID == genre.ID))
+                .OrderBy(i => i.ID)
+                .Skip(startPos)
+                .Take(limit)
+                .AsNoTracking();
         }
 
         public IQueryable<Location> GetAllLocations()
@@ -99,12 +120,18 @@ namespace Infrastructure
             return subjects.GetAll();
         }
 
-        public IQueryable<Subject> GetTopSubjects(int limit)
+        public IEnumerable<Keyword> GetTopSubjects(int limit)
         {
-            return dbContext.Subjects
-                .Include(s => s.DetailedSubjects)
-                .OrderByDescending(s => s.DetailedSubjects.Count)
-                .Take(limit);
+            return dbContext.Database.SqlQuery<Keyword>(@"
+SELECT TOP (@p0) Subjects.ID,
+       [Text],
+       COUNT(*) AS Count
+FROM Subjects
+JOIN DetailedSubjects ON Subjects.ID = SubjectID
+GROUP BY Subjects.ID,
+         [Text]
+ORDER BY Count DESC",
+                limit).ToList();
         }
 
         public DetailedSubject GetDetailedSubject(int id)
@@ -200,6 +227,12 @@ namespace Infrastructure
         public void SaveChanges()
         {
             dbContext.SaveChanges();
+        }
+
+        private int RandomStartingPos(Keyword keyword, int limit)
+        {
+            var maxPlusOne = keyword.Count - limit;
+            return maxPlusOne > 0 ? random.Next(maxPlusOne) : 0;
         }
     }
 }

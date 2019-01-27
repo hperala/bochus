@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Core
 {
@@ -7,8 +8,8 @@ namespace Core
         void AddItem(Item entity);
         Item GetItem(int id);
         IQueryable<Item> GetAllItems();
-        IQueryable<Item> GetItemsBySubject(Subject subject);
-        IQueryable<Item> GetItemsByGenre(Genre genre);
+        IQueryable<Item> GetRandomItemsBySubject(Keyword subject, int limit);
+        IQueryable<Item> GetRandomItemsByGenre(Keyword genre, int limit);
         void UpdateItem(Item entity);
         void RemoveItem(Item entity);
 
@@ -22,7 +23,7 @@ namespace Core
         Subject GetSubject(int id);
         Subject GetSubject(string text);
         IQueryable<Subject> GetAllSubjects();
-        IQueryable<Subject> GetTopSubjects(int limit);
+        IEnumerable<Keyword> GetTopSubjects(int limit);
         void UpdateSubject(Subject entity);
         void RemoveSubject(Subject entity);
 
@@ -30,7 +31,7 @@ namespace Core
         Genre GetGenre(int id);
         Genre GetGenre(string text);
         IQueryable<Genre> GetAllGenres();
-        IQueryable<Genre> GetTopGenres(int limit);
+        IEnumerable<Keyword> GetTopGenres(int limit);
         void UpdateGenre(Genre entity);
         void RemoveGenre(Genre entity);
 
@@ -42,5 +43,12 @@ namespace Core
         void RemoveLocation(Location entity);
 
         void SaveChanges();
+    }
+
+    public class Keyword
+    {
+        public int ID { get; set; }
+        public string Text { get; set; }
+        public int Count { get; set; }
     }
 }
